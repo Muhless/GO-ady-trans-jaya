@@ -7,6 +7,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
 
 	r.GET("/api/users", controllers.GetUsers)
 	r.GET("/api/users/:id", controllers.GetUserByID)

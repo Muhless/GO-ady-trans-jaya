@@ -3,9 +3,9 @@ package models
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ID       uint   `json:"id" gorm:"primarykey"`
+	Username string `json:"username" gorm:"unique;not null"`
+	Password string `json:"password" gorm:"not null"`
 }
 
 // hash password

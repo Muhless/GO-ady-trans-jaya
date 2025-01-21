@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"ady-trans-jaya/config"
 	"ady-trans-jaya/models"
 	"net/http"
 	"strconv"
@@ -8,32 +9,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var users = []models.User{
-	{ID: 1, Username: "Cihuy", Password: "cihuy12345"},
-	{ID: 2,Username: "admin", Password: "admin123"},
-}
-
 func GetUsers(c *gin.Context) {
+	var users []models.User
+	if err := config.DB.Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, users)
 }
 
 func GetUserByID(c *gin.Context) {
-    id := c.Param("id")
+	id := c.Param("id")
 	userID, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid user ID"})
 	}
-    for _, user := range users {
-        if user.ID == userID {
-            c.JSON(http.StatusOK, user)
-            return
-        }
-    }
-    c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+
+	var user models.User
+	if err := config.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
-
-func CreateUser(c *gin.Context)  {
+func CreateUser(c *gin.Context) {
 	var newUser models.User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -45,12 +45,13 @@ func CreateUser(c *gin.Context)  {
 		return
 	}
 
-	users = append(users, newUser)
+	if err := config.DB.Create(&newUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User succesfully created",
-		"user": newUser,
+		"user":    newUser,
 	})
 }
-
-
-
