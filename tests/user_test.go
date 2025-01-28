@@ -23,18 +23,18 @@ func setupRouter() *gin.Engine {
 }
 
 func resetDatabase() {
-	config.DB.Exec("DELETE FROM users")
+	config.DB.Exec("DELETE FROM tbl_users")
 }
 
 func TestGetUsers(t *testing.T) {
 	config.ConnectDB()
 	resetDatabase()
-	config.DB.Create(&models.User{Username: "testuser", Password: "password"})
+	config.DB.Create(&models.User{Username: "admin", Password: "admin123"})
 
 	router := setupRouter()
-	router.GET("/users", controllers.GetUsers)
+	router.GET("/api/users", controllers.GetUsers)
 
-	req, _ := http.NewRequest("GET", "/users", nil)
+	req, _ := http.NewRequest("GET", "/api/users", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -48,13 +48,13 @@ func TestCreateUser(t *testing.T) {
 	router.POST("/users", controllers.CreateUser)
 
 	payload := models.User{
-		Username: "testingcreate",
-		Password: "testingcreate123",
+		Username: "cihuy",
+		Password: "cihuy123",
 	}
 	body, _ := json.Marshal(payload)
 
 	req, _ := http.NewRequest("POST", "/users", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application-json")
+	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
